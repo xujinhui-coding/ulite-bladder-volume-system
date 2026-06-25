@@ -5,13 +5,6 @@
 *.tiff
 *.jpeg
 
-# 模型权重
-*.pth
-*.pth.tar
-
-# ONNX
-*.onnx
-
 # Python 缓存
 __pycache__/
 *.pyc
