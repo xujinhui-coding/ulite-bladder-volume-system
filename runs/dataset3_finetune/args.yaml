@@ -1,0 +1,17 @@
+data: data/dataset3_ulite
+weights: runs/chula/best.pth.tar
+img_size:
+- 256
+- 256
+cfg: data/dataset3_ulite/param.yaml
+workers: 0
+epochs: 150
+batch_size: 16
+val_batch_size: 1
+adam: false
+evaluate: false
+seed: 8888
+gpu: '0'
+amp: false
+cache: null
+save_dir: runs/dataset3_finetune

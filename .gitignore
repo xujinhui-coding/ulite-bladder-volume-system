@@ -1,0 +1,25 @@
+# 图像文件
+*.jpg
+*.png
+*.bmp
+*.tiff
+*.jpeg
+
+# 模型权重
+*.pth
+*.pth.tar
+
+# ONNX
+*.onnx
+
+# Python 缓存
+__pycache__/
+*.pyc
+*.pyo
+
+# 运行结果
+runs/*/prediction/
+
+# 其他
+.DS_Store
+thumbs.db

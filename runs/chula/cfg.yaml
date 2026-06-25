@@ -17,8 +17,8 @@ shear: 0.0  # image shear (+/- deg)
 perspective: 0.0  # image perspective (+/- fraction), range 0-0.001
 flipud: 0.5  # image flip up-down (probability)
 fliplr: 0.5  # image flip left-right (probability)
-mosaic: 1.0  # image mosaic (probability)
-copy_paste: 0.2  # image copy paste (probability)
+mosaic: 0.0  # image mosaic (probability)
+copy_paste: 0.0  # image copy paste (probability)
 
 # Parameters for training
 lr0: 0.003  # initial learning rate (i.e. SGD=1E-2, Adam=1E-3)

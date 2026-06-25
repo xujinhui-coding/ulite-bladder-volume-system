@@ -3,8 +3,8 @@ weights: ''
 img_size:
 - 64
 - 64
-cfg: data/crop_rbc/param.yaml
-workers: 4
+cfg: data/crop_chula/param.yaml
+workers: 0
 epochs: 300
 batch_size: 16
 val_batch_size: 1
@@ -12,6 +12,6 @@ adam: false
 evaluate: false
 seed: 8888
 gpu: '0'
-amp: true
+amp: false
 cache: null
 save_dir: runs/crop_chula

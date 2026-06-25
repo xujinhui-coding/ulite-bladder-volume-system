@@ -30,10 +30,10 @@ def load_image(self, index):
     if image is None or labels is None or contours is None or centers is None:        
         name = self.files[index]
         for ifm in IMAGE_FORMATS:
-            image_path = '/'.join((self.image_dir, f"{name}.{ifm}"))
+            image_path = os.path.join(self.image_dir, f"{name}.{ifm}")
             if os.path.exists(image_path):
                 break
-        label_path = '/'.join((self.label_dir, name + '.txt'))
+        label_path = os.path.join(self.label_dir, name + '.txt')
         image = cv2.imread(image_path)
         h, w = image.shape[:2]
         if tuple(image.shape[:2]) != LOAD_IMAGE_SIZE:
@@ -96,9 +96,9 @@ class YoloData(Dataset):
             LOAD_IMAGE_SIZE = self.img_size    
         
         print('Verify images and labels...')
-        data_root = file[:file.rfind('/')]
-        self.image_dir = '/'.join((data_root, 'images'))
-        self.label_dir = '/'.join((data_root, 'labels'))
+        data_root = os.path.dirname(file)
+        self.image_dir = os.path.join(data_root, 'images')
+        self.label_dir = os.path.join(data_root, 'labels')
         cache_file = file.replace('txt', 'cache')
         if os.path.exists(cache_file):
             with open(cache_file, 'r') as f:
@@ -116,13 +116,13 @@ class YoloData(Dataset):
             for i, name in nbar:
                 support = False
                 for ifm in IMAGE_FORMATS:
-                    image_path = '/'.join((self.image_dir, f"{name}.{ifm}"))
+                    image_path = os.path.join(self.image_dir, f"{name}.{ifm}")
                     if os.path.exists(image_path):
                         support = True
                         break
                 if not support:
                     print('Image:', name, 'unsupported format!')
-                label_path = '/'.join((self.label_dir, name + '.txt'))
+                label_path = os.path.join(self.label_dir, name + '.txt')
                 if not os.path.exists(label_path):
                     print('Label:', name, 'does not exist!')
                     continue
