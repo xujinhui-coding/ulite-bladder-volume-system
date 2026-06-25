@@ -1,6 +1,8 @@
 # U-Lite
 
-> Unofficial PyTorch Implementation of **"1M parameters are enough? A lightweight CNN-Based model for medical image segmentation"**
+> 基于 [duong-db/U-Lite](https://github.com/duong-db/U-Lite) 开源代码实现的**"1M parameters are enough? A lightweight CNN-Based model for medical image segmentation"** 医学图像分割模型
+>
+> 本仓库在原作者代码基础上，增加了膀胱超声图像数据集支持、ONNX 部署导出、U-Lite + Snake 两阶段分割流水线等自定义功能。
 >
 > 一个用于医学图像分割的轻量级 CNN 模型（参数量 ~800K~1M），采用 U-Net 风格的编码器-解码器架构，核心亮点是使用**轴向深度可分离卷积**（Axial Depthwise Separable Convolution）替代标准卷积，大幅降低参数量。
 
@@ -43,7 +45,6 @@ u-lite/
 ├── test_datasets.py            # 数据集调试与可视化
 ├── requirements.txt            # 依赖
 ├── .gitattributes              # Git 属性配置
-├── U-Lite.md                   # 中文详细说明文档
 └── README.md                   # 本文档
 ```
 
@@ -385,4 +386,4 @@ Pillow>=7.1.2
 
 - 论文：[1M parameters are enough? A lightweight CNN-Based model for medical image segmentation](https://mp.weixin.qq.com/s/tzITXfpMpgQaUEQNvQKzdQ)
 - 原始实现：[duong-db/U-Lite](https://github.com/duong-db/U-Lite)
-- 本仓库：[Accustomer/U-Lite](https://github.com/Accustomer/U-Lite.git)
+- 本仓库：[xujinhui-coding/ulite-bladder-volume-system](https://github.com/xujinhui-coding/ulite-bladder-volume-system)
