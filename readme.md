@@ -1,6 +1,6 @@
 # U-Lite
 
-> 基于 [duong-db/U-Lite](https://github.com/duong-db/U-Lite) 开源代码实现的**"1M parameters are enough? A lightweight CNN-Based model for medical image segmentation"** 医学图像分割模型
+> 基于 [duong-db/U-Lite](https://github.com/duong-db/U-Lite)（论文作者）与 [Accustomer/U-Lite](https://github.com/Accustomer/U-Lite)（非官方 PyTorch 实现）开源代码实现的 **"1M parameters are enough? A lightweight CNN-Based model for medical image segmentation"** 医学图像分割模型
 >
 > 本仓库在原作者代码基础上，增加了膀胱超声图像数据集支持、ONNX 部署导出、U-Lite + Snake 两阶段分割流水线等自定义功能。
 >
