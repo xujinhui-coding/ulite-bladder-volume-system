@@ -1,3 +1,5 @@
+import base64
+
 import cv2
 import numpy as np
 
@@ -31,3 +33,11 @@ def calc_metrics(mask: np.ndarray) -> tuple[int, float]:
     total_pixels = int(mask.shape[0] * mask.shape[1])
     lesion_ratio = float(lesion_area / total_pixels) if total_pixels else 0.0
     return lesion_area, lesion_ratio
+
+
+def mask_to_base64(mask: np.ndarray) -> str:
+    """将二值 mask 编码为 base64 PNG 字符串，用于 JSON 传输。"""
+    success, buf = cv2.imencode(".png", mask)
+    if not success:
+        return ""
+    return base64.b64encode(buf).decode("ascii")

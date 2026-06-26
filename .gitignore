@@ -3,12 +3,18 @@
 venv/
 env/
 
+# Python 缓存
+__pycache__/
+*.pyc
+*.pyo
+
 # 模型、图片、缓存文件夹
 models/
 temp_upload/
 result_img/
 data/
 runs/
+test/
 
 # 图像文件
 *.jpg

@@ -1,12 +1,15 @@
 from __future__ import annotations
 
+import base64
 import json
 import os
 from datetime import datetime
 from typing import Any
 
+import cv2
+import numpy as np
 from PySide6.QtCore import QSettings, Qt, QThread, QTimer, Signal
-from PySide6.QtGui import QFont, QPixmap
+from PySide6.QtGui import QFont, QImage, QPainter, QPixmap
 from PySide6.QtWidgets import (
     QApplication,
     QComboBox,
@@ -559,16 +562,61 @@ class MainWindow(QMainWindow):
         self.infer_btn.setText("开始推理")
 
         orig_url = self._client.build_url(result.get("original_image_url", ""))
-        result_url = self._client.build_url(result.get("result_image_url", ""))
         self.orig_label.clear()
         self.result_label.clear()
 
         def _load_results() -> None:
             try:
                 orig_pix = load_remote_pixmap(orig_url) if orig_url else QPixmap()
-                res_pix = load_remote_pixmap(result_url) if result_url else QPixmap()
                 set_label_pixmap(self.orig_label, orig_pix)
-                set_label_pixmap(self.result_label, res_pix)
+
+                # 从 mask_base64 生成分割叠加图
+                mask_b64 = result.get("mask_base64")
+                if mask_b64 and not orig_pix.isNull():
+                    mask_bytes = base64.b64decode(mask_b64)
+                    mask_img = QImage.fromData(mask_bytes, "PNG")
+                    if mask_img.isNull():
+                        self.result_label.clear()
+                    else:
+                        # 将 mask 转为 numpy（二值）
+                        mask_arr = np.frombuffer(mask_img.bits().tobytes(), dtype=np.uint8).reshape(
+                            mask_img.height(), mask_img.width(), 4
+                        )
+                        mask_gray = (mask_arr[:, :, 0] > 128).astype(np.uint8) * 255
+
+                        # 原图 numpy
+                        orig_img = orig_pix.toImage()
+                        orig_bits = orig_img.bits().tobytes()
+                        orig_np = np.frombuffer(orig_bits, dtype=np.uint8).reshape(
+                            orig_img.height(), orig_img.width(), 4
+                        )
+                        orig_bgr = cv2.cvtColor(orig_np[:, :, :3], cv2.COLOR_RGB2BGR)
+
+                        # 缩小 mask 到原图尺寸
+                        if mask_gray.shape[:2] != orig_bgr.shape[:2]:
+                            mask_gray = cv2.resize(
+                                mask_gray, (orig_bgr.shape[1], orig_bgr.shape[0]),
+                                interpolation=cv2.INTER_NEAREST
+                            )
+
+                        # 生成叠加图
+                        overlay = np.zeros_like(orig_bgr, dtype=np.uint8)
+                        overlay[:, :, 1] = mask_gray
+                        result_bgr = cv2.addWeighted(orig_bgr, 0.6, overlay, 0.4, 0)
+
+                        # 绘制轮廓
+                        contours, _ = cv2.findContours(
+                            mask_gray, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
+                        )
+                        cv2.drawContours(result_bgr, contours, -1, (0, 255, 0), 2)
+
+                        # 转回 QPixmap
+                        result_rgb = cv2.cvtColor(result_bgr, cv2.COLOR_BGR2RGB)
+                        h, w, ch = result_rgb.shape
+                        result_qimg = QImage(result_rgb.data, w, h, w * ch, QImage.Format_RGB888)
+                        set_label_pixmap(self.result_label, QPixmap.fromImage(result_qimg))
+                else:
+                    self.result_label.clear()
             except Exception:
                 self.status_bar.showMessage("结果图片加载失败")
 

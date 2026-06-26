@@ -88,6 +88,7 @@
     background: #f7f9fc; border: 1px solid #eef0f4;
   }
   .result-card img { width: 100%; display: block; cursor: pointer; }
+  .result-card canvas { width: 100%; display: block; }
   .result-card .card-label {
     font-size: 12px; color: #666; padding: 6px 10px; text-align: center;
     background: #f0f2f5; border-top: 1px solid #eef0f4;
@@ -154,7 +155,7 @@
         <div class="card-label">原图</div>
       </div>
       <div class="result-card">
-        <img id="segResult" src="" alt="分割结果">
+        <canvas id="segCanvas"></canvas>
         <div class="card-label">分割结果</div>
       </div>
     </div>
@@ -293,9 +294,79 @@
 
   function showResult(data) {
     const origUrl = data.original_image_url || '';
-    const segUrl = data.result_image_url || '';
     origResult.src = origUrl ? (BASE + origUrl) : '';
-    segResult.src = segUrl ? (BASE + segUrl) : '';
+
+    // 在 Canvas 上绘制分割叠加图
+    var canvas = document.getElementById('segCanvas');
+    var ctx = canvas.getContext('2d');
+    canvas.width = data.image_width || 256;
+    canvas.height = data.image_height || 256;
+
+    if (data.mask_base64 && origUrl) {
+      var origImg = new Image();
+      origImg.crossOrigin = 'anonymous';
+      origImg.onload = function() {
+        canvas.width = origImg.naturalWidth;
+        canvas.height = origImg.naturalHeight;
+        ctx.drawImage(origImg, 0, 0);
+
+        // 解码 mask PNG
+        var maskImg = new Image();
+        maskImg.onload = function() {
+          // 在临时 canvas 上获取 mask 像素
+          var tc = document.createElement('canvas');
+          tc.width = maskImg.naturalWidth;
+          tc.height = maskImg.naturalHeight;
+          var tctx = tc.getContext('2d');
+          tctx.drawImage(maskImg, 0, 0);
+          var maskData = tctx.getImageData(0, 0, tc.width, tc.height);
+          var pixels = maskData.data;
+
+          // 在主 canvas 上叠加半透明绿色
+          var overlay = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          var opx = overlay.data;
+          var sw = canvas.width / tc.width;   // 缩放比例
+          var sh = canvas.height / tc.height;
+          for (var y = 0; y < tc.height; y++) {
+            for (var x = 0; x < tc.width; x++) {
+              var mi = (y * tc.width + x) * 4;
+              if (pixels[mi] > 128) {
+                // 映射到原图坐标
+                var ox = Math.round(x * sw);
+                var oy = Math.round(y * sh);
+                var oi = (oy * canvas.width + ox) * 4;
+                // 混合: 60% 原图 + 40% 绿色
+                opx[oi]     = Math.round(opx[oi] * 0.6);
+                opx[oi + 1] = Math.round(opx[oi + 1] * 0.6 + 255 * 0.4);
+                opx[oi + 2] = Math.round(opx[oi + 2] * 0.6);
+
+                // 轮廓检测: 若任一 4-邻域为背景，将此像素描边
+                var isEdge = false;
+                var neighbors = [
+                  [x - 1, y], [x + 1, y], [x, y - 1], [x, y + 1]
+                ];
+                for (var n = 0; n < neighbors.length; n++) {
+                  var nx = neighbors[n][0], ny = neighbors[n][1];
+                  if (nx < 0 || nx >= tc.width || ny < 0 || ny >= tc.height) {
+                    isEdge = true; break;
+                  }
+                  var ni = (ny * tc.width + nx) * 4;
+                  if (pixels[ni] <= 128) { isEdge = true; break; }
+                }
+                if (isEdge) {
+                  opx[oi]     = 0;
+                  opx[oi + 1] = 255;
+                  opx[oi + 2] = 0;
+                }
+              }
+            }
+          }
+          ctx.putImageData(overlay, 0, 0);
+        };
+        maskImg.src = 'data:image/png;base64,' + data.mask_base64;
+      };
+      origImg.src = origUrl ? (BASE + origUrl) : '';
+    }
 
     document.getElementById('mTime').textContent = data.inference_time_ms != null ? data.inference_time_ms + ' ms' : '--';
     document.getElementById('mArea').textContent = data.lesion_area != null ? data.lesion_area.toLocaleString() + ' px' : '--';

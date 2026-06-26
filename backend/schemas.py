@@ -15,7 +15,9 @@ class PredictResultResponse(BaseModel):
     task_id: str
     status: str
     original_image_url: str
-    result_image_url: str | None = None
+    mask_base64: str | None = None
+    image_width: int | None = None
+    image_height: int | None = None
     inference_time_ms: float | None = None
     lesion_area: int | None = None
     lesion_ratio: float | None = None
