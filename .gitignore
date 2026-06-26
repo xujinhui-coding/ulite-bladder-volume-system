@@ -1,18 +1,37 @@
+# 虚拟环境
+.venv/
+venv/
+env/
+
+# 模型、图片、缓存文件夹
+models/
+temp_upload/
+result_img/
+data/
+runs/
+
 # 图像文件
 *.jpg
+*.jpeg
 *.png
 *.bmp
+*.tif
 *.tiff
-*.jpeg
+*.webp
+*.gif
 
-# Python 缓存
-__pycache__/
-*.pyc
-*.pyo
+# 权重文件
+*.onnx
+*.pth
+*.pt
+*.ckpt
 
-# 运行结果
-runs/*/prediction/
+# 日志临时文件
+*.log
+*.tmp
+backend.log
+nohup.out
 
-# 其他
-.DS_Store
-thumbs.db
+# IDE 相关
+.trae/
+.trae-cn-server/
