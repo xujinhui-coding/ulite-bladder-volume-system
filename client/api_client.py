@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import time
 from typing import Any
 from urllib import request
 
@@ -20,39 +21,49 @@ class SegmentationApiClient:
         except Exception:
             return False
 
-    def submit_predict(self, image_path: str, model_name: str = "u-lite") -> dict[str, Any]:
-        boundary = "----TraeFormBoundary7MA4YWxkTrZu0gW"
-        body = self._build_multipart_body(image_path, model_name, boundary)
-        req = request.Request(
-            url=f"{self.base_url}/predict",
-            data=body,
-            headers={"Content-Type": f"multipart/form-data; boundary={boundary}"},
-            method="POST",
-        )
-        return self._request_json(req, timeout=60)
+    def submit_task(self, image_path: str, threshold: float = 0.5, model_name: str = "u-lite") -> dict[str, Any]:
+        """提交推理任务，返回 task_id + original_image_url"""
+        try:
+            boundary = "----TraeFormBoundary7MA4YWxkTrZu0gW"
+            body = self._build_multipart_body(image_path, threshold, model_name, boundary)
+            req = request.Request(
+                url=f"{self.base_url}/predict",
+                data=body,
+                headers={"Content-Type": f"multipart/form-data; boundary={boundary}"},
+                method="POST",
+            )
+            with request.urlopen(req, timeout=30) as resp:
+                payload = resp.read().decode("utf-8")
+                return json.loads(payload)
+        except Exception as exc:
+            raise ApiError(f"提交任务失败: {exc}") from exc
 
-    def get_predict_result(self, task_id: str) -> dict[str, Any]:
-        req = request.Request(
-            url=f"{self.base_url}/predict/{task_id}",
-            method="GET",
-        )
-        return self._request_json(req, timeout=30)
-
-    def predict(self, image_path: str, model_name: str = "u-lite") -> dict[str, Any]:
-        return self.submit_predict(image_path, model_name)
+    def poll_result(self, task_id: str, poll_interval: float = 1.0, timeout: float = 120.0) -> dict[str, Any]:
+        """轮询 GET /predict/{task_id} 直到 completed 或 failed"""
+        deadline = time.time() + timeout
+        while time.time() < deadline:
+            try:
+                req = request.Request(url=f"{self.base_url}/predict/{task_id}", method="GET")
+                with request.urlopen(req, timeout=10) as resp:
+                    payload = resp.read().decode("utf-8")
+                    data = json.loads(payload)
+                    status = data.get("status", "")
+                    if status == "completed":
+                        return data
+                    if status == "failed":
+                        raise ApiError(f"推理失败: {data.get('error', '未知错误')}")
+                    # pending / processing → 继续轮询
+            except ApiError:
+                raise
+            except Exception as exc:
+                raise ApiError(f"轮询失败: {exc}") from exc
+            time.sleep(poll_interval)
+        raise ApiError(f"轮询超时 ({timeout}s)")
 
     def build_url(self, relative_url: str) -> str:
         return f"{self.base_url}{relative_url}"
 
-    def _request_json(self, req: request.Request, timeout: int) -> dict[str, Any]:
-        try:
-            with request.urlopen(req, timeout=timeout) as resp:
-                payload = resp.read().decode("utf-8")
-                return json.loads(payload)
-        except Exception as exc:
-            raise ApiError(f"请求失败: {exc}") from exc
-
-    def _build_multipart_body(self, image_path: str, model_name: str, boundary: str) -> bytes:
+    def _build_multipart_body(self, image_path: str, threshold: float, model_name: str, boundary: str) -> bytes:
         with open(image_path, "rb") as file_obj:
             image_bytes = file_obj.read()
 
@@ -60,6 +71,7 @@ class SegmentationApiClient:
         lines: list[bytes] = []
         fields = {
             "model_name": model_name,
+            "threshold": str(threshold),
         }
         for key, value in fields.items():
             lines.append(f"--{boundary}".encode())
