@@ -2,7 +2,7 @@
 
 > 基于 [duong-db/U-Lite](https://github.com/duong-db/U-Lite)（论文作者）与 [Accustomer/U-Lite](https://github.com/Accustomer/U-Lite)（非官方 PyTorch 实现）开源代码实现的 **"1M parameters are enough? A lightweight CNN-Based model for medical image segmentation"** 医学图像分割模型
 >
-> 本仓库在原作者代码基础上，增加了膀胱超声图像数据集支持、ONNX 部署导出、U-Lite + Snake 两阶段分割流水线等自定义功能。
+> 本仓库在原作者代码基础上，增加了膀胱超声图像数据集支持、ONNX 部署导出、qt前端展示等自定义功能。
 >
 > 一个用于医学图像分割的轻量级 CNN 模型（参数量 ~800K~1M），采用 U-Net 风格的编码器-解码器架构，核心亮点是使用**轴向深度可分离卷积**（Axial Depthwise Separable Convolution）替代标准卷积，大幅降低参数量。
 
@@ -29,21 +29,21 @@ u-lite/
 │   ├── dataset1_ulite/         # dataset1 训练数据集（256×256）
 │   └── dataset3_ulite/         # dataset3 训练数据集（512×640）
 ├── runs/                       # 训练输出
-│   └── dataset1_scratch/       # dataset1 模型训练结果
-├── train.py                    # 训练主脚本
-├── infer_demo.py               # 推理演示脚本
-├── infer_single.py             # 单张图像推理（dataset/valid）
+│   └── dataset1_scratch/       # dataset1 模型训练结果（存放训练结果，模型运行需要里面的权重文件）
+├── train.py                    # 训练主脚本（测试脚本）
+├── infer_demo.py               # 推理演示脚本（测试脚本）
+├── infer_single.py             # 单张图像推理（dataset/valid测试文件）
 ├── infer_onnx.py               # ONNX 推理（无需 PyTorch）
-├── infer_dataset1.py           # dataset1/test 批量推理
-├── infer_dataset1_valid.py     # dataset1/valid 推理 + 真值对比
-├── infer_dataset1_pack.py      # dataset1 test 推理 + HTML 打包
-├── infer_dataset3.py           # dataset3/test 批量推理
-├── infer_dataset3_valid.py     # dataset3/valid 推理 + COCO 真值对比
+├── infer_dataset1.py           # dataset1/test 批量推理（测试文件）
+├── infer_dataset1_valid.py     # dataset1/valid 推理 + 真值对比（测试文件）
+├── infer_dataset1_pack.py      # dataset1 test 推理 + HTML 打包（测试文件）
+├── infer_dataset3.py           # dataset3/test 批量推理（测试文件）
+├── infer_dataset3_valid.py     # dataset3/valid 推理 + COCO 真值对比（测试文件）
 ├── export_onnx.py              # 模型导出为 ONNX 格式
-├── ulite_snake_pipeline.py     # U-Lite + Snake 两阶段分割流水线
+├── ulite_snake_pipeline.py     # U-Lite + Snake 两阶段分割流水线（测试文件）
 ├── fileprocessing.py           # 数据预处理工具
-├── test_datasets.py            # 数据集调试与可视化
-├── requirements.txt            # 依赖
+├── test_datasets.py            # 数据集调试与可视化（测试文件）
+├── requirements.txt            # 依赖（项目需要的依赖都在这里）
 ├── .gitattributes              # Git 属性配置
 └── README.md                   # 本文档
 ```
