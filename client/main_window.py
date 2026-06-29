@@ -779,7 +779,7 @@ class MainWindow(QMainWindow):
         trend_layout.setContentsMargins(22, 20, 22, 22)
         trend_layout.setSpacing(16)
 
-        trend_title = QLabel("病灶分割趋势监控")
+        trend_title = QLabel("区域分割趋势监控")
         trend_title.setAlignment(Qt.AlignCenter)
         trend_title.setStyleSheet("color: #0F172A; font-size: 20px; font-weight: 800; padding: 2px 0 6px 0;")
         trend_layout.addWidget(trend_title)
@@ -889,7 +889,7 @@ class MainWindow(QMainWindow):
 
         self.history_table = QTableWidget(0, 6)
         self.history_table.setHorizontalHeaderLabels([
-            "时间", "文件名", "模型", "病灶面积(px)", "病灶占比", "推理耗时(ms)"
+            "时间", "文件名", "模型", "区域面积(px)", "区域占比", "推理耗时(ms)"
         ])
         self.history_table.horizontalHeader().setStretchLastSection(True)
         self.history_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
@@ -1058,8 +1058,8 @@ class MainWindow(QMainWindow):
 
         metrics = [
             ("推理耗时", f"{result.get('inference_time_ms', 0)} ms"),
-            ("病灶像素面积", str(result.get("lesion_area", 0))),
-            ("病灶占比", f"{result.get('lesion_ratio', 0):.6f}"),
+            ("区域像素面积", str(result.get("lesion_area", 0))),
+            ("区域占比", f"{result.get('lesion_ratio', 0):.6f}"),
             ("使用模型", result.get("model_name", "")),
         ]
         self.metrics_table.setRowCount(len(metrics))
@@ -1130,8 +1130,8 @@ class MainWindow(QMainWindow):
 
         metrics = [
             ("推理耗时", f"{record.get('inference_time_ms', 0)} ms"),
-            ("病灶像素面积", str(record.get("lesion_area", 0))),
-            ("病灶占比", f"{record.get('lesion_ratio', 0):.6f}"),
+            ("区域像素面积", str(record.get("lesion_area", 0))),
+            ("区域占比", f"{record.get('lesion_ratio', 0):.6f}"),
             ("使用模型", record.get("model", "")),
         ]
         self.metrics_table.setRowCount(len(metrics))
@@ -1265,8 +1265,8 @@ class MainWindow(QMainWindow):
 
     def _refresh_trend_charts(self) -> None:
         recent = list(reversed(self._history[-12:]))
-        self.area_chart_view.setChart(self._build_trend_chart("病灶面积趋势分析", recent, "lesion_area", QColor("#111A5E"), "病灶面积（px）"))
-        self.ratio_chart_view.setChart(self._build_trend_chart("病灶占比趋势分析", recent, "lesion_ratio", QColor("#3E8E88"), "病灶占比（%）", is_percent=True))
+        self.area_chart_view.setChart(self._build_trend_chart("区域面积趋势分析", recent, "lesion_area", QColor("#111A5E"), "区域面积（px）"))
+        self.ratio_chart_view.setChart(self._build_trend_chart("区域占比趋势分析", recent, "lesion_ratio", QColor("#3E8E88"), "区域占比（%）", is_percent=True))
         self.time_chart_view.setChart(self._build_trend_chart("推理耗时趋势分析", recent, "inference_time_ms", QColor("#D8732A"), "推理耗时（ms）"))
 
     def _on_clear_history(self) -> None:
@@ -1291,7 +1291,7 @@ class MainWindow(QMainWindow):
 
         with open(path, "w", newline="", encoding="utf-8-sig") as fh:
             writer = csv.writer(fh)
-            writer.writerow(["时间", "文件名", "模型", "病灶面积(px)", "病灶占比", "推理耗时(ms)"])
+            writer.writerow(["时间", "文件名", "模型", "区域面积(px)", "区域占比", "推理耗时(ms)"])
             for rec in self._history:
                 writer.writerow([
                     rec.get("timestamp", ""),

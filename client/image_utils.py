@@ -67,11 +67,11 @@ def decode_mask(mask_base64: str) -> np.ndarray:
 
 
 def build_binary_mask_pixmap(mask_base64: str, target_width: int, target_height: int) -> QPixmap:
-    """生成二值化黑白 mask 图像（白底黑掩膜 -> 黑底白病灶更常用，这里用黑底白病灶）"""
+    """生成二值化黑白 mask 图像（白底黑掩膜 -> 黑底白区域更常用，这里用黑底白区域）"""
     mask = decode_mask(mask_base64)
     if mask.shape[1] != target_width or mask.shape[0] != target_height:
         mask = cv2.resize(mask, (target_width, target_height), interpolation=cv2.INTER_NEAREST)
-    # 黑底白病灶
+    # 黑底白区域
     rgb = cv2.cvtColor(mask, cv2.COLOR_GRAY2RGB)
     image = Image.fromarray(rgb)
     return _pil_to_pixmap(image)
